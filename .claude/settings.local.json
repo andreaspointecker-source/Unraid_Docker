@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(for item in backend frontend worker docker docs scripts config data logs .github .gitignore .env.example Dockerfile docker-compose.yml README.md STRUCTURE.md plan.md tasks.md ai.md)",
+      "Bash(do if [ -e \"$item\" ])",
+      "Bash(then mv \"$item\" media-manager/)",
+      "Bash(fi)",
+      "Bash(done)",
+      "Bash(git init:*)",
+      "Bash(git remote add:*)",
+      "Bash(git config:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

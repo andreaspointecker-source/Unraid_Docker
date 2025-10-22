@@ -1,0 +1,122 @@
+version: '3.8'
+
+services:
+  # Redis for Celery task queue
+  redis:
+    image: redis:7-alpine
+    container_name: dmm-redis
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    networks:
+      - dmm-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Main application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: docker-media-manager
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-8080}:8080"
+    volumes:
+      - ./config:/config
+      - ./data/downloads:/downloads
+      - ./data/media:/media
+      - ./data/cache:/cache
+      - ./logs:/app/logs
+    environment:
+      # User/Group
+      - PUID=${PUID:-99}
+      - PGID=${PGID:-100}
+      - TZ=${TZ:-Europe/Berlin}
+
+      # Application
+      - APP_ENV=${APP_ENV:-production}
+      - SECRET_KEY=${SECRET_KEY}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - DEBUG=${DEBUG:-false}
+
+      # Database
+      - DATABASE_URL=sqlite:////config/database.db
+
+      # Redis
+      - REDIS_URL=redis://redis:6379/0
+
+      # TMDB
+      - TMDB_API_KEY=${TMDB_API_KEY}
+      - TMDB_LANGUAGE=${TMDB_LANGUAGE:-de-DE}
+
+      # aria2c
+      - ARIA2C_HOST=localhost
+      - ARIA2C_PORT=6800
+      - MAX_CONCURRENT_DOWNLOADS=${MAX_CONCURRENT_DOWNLOADS:-3}
+      - MAX_DOWNLOAD_SPEED=${MAX_DOWNLOAD_SPEED:-0}
+
+      # Encoding
+      - ENCODING_STRATEGY=${ENCODING_STRATEGY:-prefer_remote}
+      - MAX_PARALLEL_ENCODINGS=${MAX_PARALLEL_ENCODINGS:-2}
+      - HARDWARE_ACCEL=${HARDWARE_ACCEL:-auto}
+
+      # Remote Worker
+      - REMOTE_WORKER_ENABLED=${REMOTE_WORKER_ENABLED:-false}
+      - REMOTE_WORKER_URL=${REMOTE_WORKER_URL}
+      - REMOTE_WORKER_API_KEY=${REMOTE_WORKER_API_KEY}
+
+      # File Organization
+      - AUTO_ORGANIZE=${AUTO_ORGANIZE:-true}
+      - DELETE_ORIGINAL_AFTER_CONVERSION=${DELETE_ORIGINAL_AFTER_CONVERSION:-true}
+
+      # Paths
+      - DOWNLOADS_PATH=/downloads
+      - MEDIA_PATH=/media
+      - CONFIG_PATH=/config
+      - CACHE_PATH=/cache
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - dmm-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Remote worker (run on separate machine with GPU)
+  # Uncomment if you want to run worker in same docker-compose
+  # worker:
+  #   build:
+  #     context: .
+  #     dockerfile: worker/Dockerfile
+  #   container_name: dmm-worker
+  #   restart: unless-stopped
+  #   ports:
+  #     - "5000:5000"
+  #   volumes:
+  #     - ./data/downloads:/downloads
+  #     - ./worker-temp:/temp
+  #   environment:
+  #     - API_KEY=${REMOTE_WORKER_API_KEY}
+  #     - HARDWARE_ACCEL=${WORKER_HARDWARE_ACCEL:-nvenc}
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: 1
+  #             capabilities: [gpu]
+
+networks:
+  dmm-network:
+    driver: bridge
+
+volumes:
+  redis-data:
