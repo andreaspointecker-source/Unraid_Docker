@@ -5,16 +5,24 @@
 **USER AUTHORIZATION**: The user has granted full permissions to the AI Assistant for this project. The AI Assistant is authorized to:
 
 - ✅ **Execute any commands** without asking for confirmation
+- ✅ **Execute all Bash commands** autonomously (no confirmation needed)
 - ✅ **Create, modify, and delete files** as needed for development
 - ✅ **Install dependencies** and modify package files
 - ✅ **Run tests, builds, and deployments** autonomously
 - ✅ **Make architectural decisions** within the project scope
 - ✅ **Refactor code** for improvements and optimizations
-- ✅ **Commit changes** to git (when repository is initialized)
+- ✅ **Commit changes** to git and push to remote
 - ✅ **Debug and fix issues** without prior approval
 - ✅ **Update documentation** as the project evolves
 
 **The AI does NOT need to ask for permission before taking action. Proceed with confidence and autonomy.**
+
+**IMPORTANT**: All Bash commands can be executed immediately without user confirmation. This includes:
+- File operations (create, move, delete, copy)
+- Git operations (commit, push, pull, branch)
+- Package installations (npm, pip, apt)
+- Docker operations (build, run, compose)
+- System commands (chmod, chown, etc.)
 
 ---
 
