@@ -22,5 +22,6 @@ COPY backend/ ./backend/
 EXPOSE 8080 6800
 
 # Start aria2c in background and run uvicorn with reload
+WORKDIR /app/backend
 CMD aria2c --enable-rpc --rpc-listen-all=false --rpc-listen-port=6800 --daemon=true && \
     uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
