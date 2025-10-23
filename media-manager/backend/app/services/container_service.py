@@ -45,7 +45,45 @@ class ContainerService:
             # Extract links from URL
             extracted = self.link_grabber.extract_links(url)
 
-            # Create container
+            # Check if captcha is required - JDownloader style
+            if extracted.get("requires_captcha"):
+                logger.info(f"Container requires captcha: {extracted.get('captcha_type')}")
+                container = Container(
+                    name=custom_name or extracted["name"],
+                    url=url,
+                    source=extracted["source"],
+                    folder_name=custom_folder or self._sanitize_folder_name(extracted["name"]),
+                    total_links=0,
+                    status="pending_captcha",
+                    description=f"Captcha required: {extracted.get('captcha_type')}",
+                    extra_data=str(extracted),
+                )
+                self.db.add(container)
+                self.db.commit()
+                self.db.refresh(container)
+                logger.info(f"Container {container.id} waiting for captcha resolution")
+                return container
+
+            # Check if password is required
+            if extracted.get("requires_password"):
+                logger.info("Container requires password")
+                container = Container(
+                    name=custom_name or extracted["name"],
+                    url=url,
+                    source=extracted["source"],
+                    folder_name=custom_folder or self._sanitize_folder_name(extracted["name"]),
+                    total_links=0,
+                    status="pending_password",
+                    description="Password required",
+                    extra_data=str(extracted),
+                )
+                self.db.add(container)
+                self.db.commit()
+                self.db.refresh(container)
+                logger.info(f"Container {container.id} waiting for password")
+                return container
+
+            # Create container with extracted links
             container = Container(
                 name=custom_name or extracted["name"],
                 url=url,
