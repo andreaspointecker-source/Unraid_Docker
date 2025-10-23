@@ -7,7 +7,7 @@ import type {
   DownloadActionResponse,
 } from '../types/download';
 
-const API_BASE = '/api/downloads';
+const API_BASE = '/api/downloads/';
 
 export const downloadApi = {
   // Get all downloads

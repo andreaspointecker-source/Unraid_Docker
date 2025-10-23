@@ -146,7 +146,7 @@ class DownloadService:
             download.status = DownloadStatus.COMPLETED.value
             # Set file path from aria2c
             if status.get("files") and len(status["files"]) > 0:
-                download.file_path = status["files"][0]["path"]
+                download.file_path = str(status["files"][0]["path"])
                 download.filename = status.get("name", "")
         elif aria2_status == "error":
             download.status = DownloadStatus.FAILED.value
