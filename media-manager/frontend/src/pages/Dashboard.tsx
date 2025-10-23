@@ -7,6 +7,8 @@ import {
 } from '@mui/icons-material';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import { downloadApi } from '../api/downloads';
+import type { DownloadStats } from '../types/download';
 
 interface HealthResponse {
   status: string;
@@ -16,7 +18,7 @@ interface HealthResponse {
 }
 
 export default function Dashboard() {
-  const { data: health, isLoading } = useQuery<HealthResponse>({
+  const { data: health, isLoading: healthLoading } = useQuery<HealthResponse>({
     queryKey: ['health'],
     queryFn: async () => {
       const response = await axios.get('/api/health');
@@ -25,10 +27,16 @@ export default function Dashboard() {
     refetchInterval: 30000, // Refetch every 30 seconds
   });
 
+  const { data: downloadStats } = useQuery<DownloadStats>({
+    queryKey: ['downloadStats'],
+    queryFn: () => downloadApi.getStats(),
+    refetchInterval: 5000, // Refetch every 5 seconds
+  });
+
   const stats = [
     {
       title: 'Active Downloads',
-      value: '0',
+      value: String(downloadStats?.active || 0),
       icon: <CloudDownload fontSize="large" />,
       color: '#1976d2',
     },
@@ -40,13 +48,13 @@ export default function Dashboard() {
     },
     {
       title: 'Completed',
-      value: '0',
+      value: String(downloadStats?.completed || 0),
       icon: <CheckCircle fontSize="large" />,
       color: '#2e7d32',
     },
     {
       title: 'Errors',
-      value: '0',
+      value: String(downloadStats?.failed || 0),
       icon: <ErrorIcon fontSize="large" />,
       color: '#d32f2f',
     },
@@ -58,7 +66,7 @@ export default function Dashboard() {
         Dashboard
       </Typography>
 
-      {isLoading ? (
+      {healthLoading ? (
         <Box display="flex" justifyContent="center" mt={4}>
           <CircularProgress />
         </Box>

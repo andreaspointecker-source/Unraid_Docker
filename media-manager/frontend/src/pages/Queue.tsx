@@ -1,5 +1,18 @@
-import { Box, Typography, Card, CardContent, Tabs, Tab } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Tabs,
+  Tab,
+  Button,
+  Paper,
+} from '@mui/material';
 import { useState } from 'react';
+import { Add as AddIcon } from '@mui/icons-material';
+import AddDownloadModal from '../components/Downloads/AddDownloadModal';
+import DownloadList from '../components/Downloads/DownloadList';
+import type { DownloadStatus } from '../types/download';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -25,16 +38,47 @@ function TabPanel(props: TabPanelProps) {
 
 export default function Queue() {
   const [tabValue, setTabValue] = useState(0);
+  const [downloadTab, setDownloadTab] = useState(0);
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
+  const downloadStatusMap: (DownloadStatus | undefined)[] = [
+    undefined, // All
+    'downloading',
+    'paused',
+    'completed',
+    'failed',
+  ];
+
+  const handleAddSuccess = () => {
+    setRefreshTrigger((prev) => prev + 1);
+  };
+
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        Queue Management
-      </Typography>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 3,
+        }}
+      >
+        <Typography variant="h4">Queue Management</Typography>
+        {tabValue === 0 && (
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => setAddModalOpen(true)}
+          >
+            Add Download
+          </Button>
+        )}
+      </Box>
 
       <Card>
         <Tabs value={tabValue} onChange={handleTabChange} aria-label="queue tabs">
@@ -46,11 +90,23 @@ export default function Queue() {
         </Tabs>
 
         <TabPanel value={tabValue} index={0}>
-          <CardContent>
-            <Typography variant="body1">
-              No active downloads. Downloads will appear here when added.
-            </Typography>
-          </CardContent>
+          <Paper sx={{ mb: 2 }}>
+            <Tabs
+              value={downloadTab}
+              onChange={(_, newValue) => setDownloadTab(newValue)}
+              variant="fullWidth"
+            >
+              <Tab label="All" />
+              <Tab label="Downloading" />
+              <Tab label="Paused" />
+              <Tab label="Completed" />
+              <Tab label="Failed" />
+            </Tabs>
+          </Paper>
+          <DownloadList
+            status={downloadStatusMap[downloadTab]}
+            refreshTrigger={refreshTrigger}
+          />
         </TabPanel>
 
         <TabPanel value={tabValue} index={1}>
@@ -85,6 +141,12 @@ export default function Queue() {
           </CardContent>
         </TabPanel>
       </Card>
+
+      <AddDownloadModal
+        open={addModalOpen}
+        onClose={() => setAddModalOpen(false)}
+        onSuccess={handleAddSuccess}
+      />
     </Box>
   );
 }
