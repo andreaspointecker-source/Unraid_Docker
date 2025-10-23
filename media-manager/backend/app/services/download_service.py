@@ -28,6 +28,7 @@ class DownloadService:
         self,
         url: str,
         premium_account_id: Optional[int] = None,
+        container_id: Optional[int] = None,
     ) -> Download:
         """
         Add a new download.
@@ -35,6 +36,7 @@ class DownloadService:
         Args:
             url: Download URL
             premium_account_id: Optional premium account ID
+            container_id: Optional container ID for grouping
 
         Returns:
             Download: Created download object
@@ -44,6 +46,7 @@ class DownloadService:
             url=url,
             status=DownloadStatus.PENDING.value,
             premium_account_id=premium_account_id,
+            container_id=container_id,
         )
         self.db.add(download)
         self.db.commit()

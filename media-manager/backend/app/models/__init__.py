@@ -12,6 +12,7 @@ from app.models.base import (
     WorkerStatus,
     WorkerType,
 )
+from app.models.container import Container
 from app.models.download import Download
 from app.models.encoding import EncodingJob, EncodingPreset
 from app.models.metadata import MediaMetadata
@@ -20,6 +21,7 @@ from app.models.worker import Worker
 
 __all__ = [
     # Models
+    "Container",
     "Download",
     "EncodingJob",
     "EncodingPreset",

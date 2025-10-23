@@ -24,7 +24,9 @@ services:
     volumes:
       - ./backend:/app/backend
       - ./config:/config
-      - ./data:/data
+      - ./data/downloads:/downloads
+      - ./data/media:/media
+      - ./data/cache:/cache
       - ./logs:/app/logs
     environment:
       - APP_ENV=development
@@ -41,7 +43,6 @@ services:
       - redis
     networks:
       - dmm-network
-    command: sh -c "aria2c --enable-rpc --rpc-listen-all=false --rpc-listen-port=6800 --daemon=true && uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload"
 
   # Frontend (development server with hot-reload)
   frontend:

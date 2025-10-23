@@ -1,7 +1,8 @@
 """Download database model."""
 
-from sqlalchemy import Column, Float, Integer, String, Text
+from sqlalchemy import Column, Float, Integer, String, Text, ForeignKey
 from sqlalchemy.dialects.sqlite import JSON
+from sqlalchemy.orm import relationship
 
 from app.database import Base
 from app.models.base import DownloadStatus, TimestampMixin
@@ -27,6 +28,7 @@ class Download(Base, TimestampMixin):
     # Download details
     aria2_gid = Column(String(50), unique=True, index=True)  # aria2c download GID
     premium_account_id = Column(Integer, nullable=True)  # FK to premium account
+    container_id = Column(Integer, ForeignKey("containers.id"), nullable=True, index=True)  # FK to container
 
     # File info
     file_path = Column(Text)  # Path where file is/will be stored
@@ -40,6 +42,9 @@ class Download(Base, TimestampMixin):
     headers = Column(JSON)  # HTTP headers as JSON
     cookies = Column(JSON)  # Cookies as JSON
     extra_data = Column(JSON)  # Additional data
+
+    # Relationships
+    container = relationship("Container", back_populates="downloads")
 
     def __repr__(self):
         return f"<Download(id={self.id}, filename={self.filename}, status={self.status})>"

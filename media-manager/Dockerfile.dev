@@ -18,10 +18,16 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy backend code (will be overridden by volume mount)
 COPY backend/ ./backend/
 
+# Copy entrypoint script
+COPY docker/entrypoint-dev.sh /entrypoint-dev.sh
+RUN chmod +x /entrypoint-dev.sh
+
 # Expose ports
 EXPOSE 8080 6800
 
-# Start aria2c in background and run uvicorn with reload
+# Set working directory
 WORKDIR /app/backend
-CMD aria2c --enable-rpc --rpc-listen-all=false --rpc-listen-port=6800 --daemon=true && \
-    uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
+
+# Use entrypoint script
+ENTRYPOINT ["/entrypoint-dev.sh"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080", "--reload"]

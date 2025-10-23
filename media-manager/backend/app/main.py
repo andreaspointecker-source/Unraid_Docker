@@ -137,9 +137,10 @@ except Exception as e:
 
 
 # Import and include routers
-from app.api import downloads
+from app.api import downloads, containers
 
 app.include_router(downloads.router, prefix="/api/downloads", tags=["Downloads"])
+app.include_router(containers.router, prefix="/api/containers", tags=["Containers"])
 
 # These will be added as we implement each module
 # from app.api import encoding, tmdb, settings, accounts, passwords, workers
