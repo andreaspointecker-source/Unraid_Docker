@@ -88,6 +88,12 @@ async def list_downloads(
     - **offset**: Offset for pagination
     """
     downloads = service.list_downloads(status=status, limit=limit, offset=offset)
+
+    # Update status from aria2c for active downloads
+    for download in downloads:
+        if download.status in ["queued", "downloading", "paused"]:
+            service.update_download_status(download.id)
+
     return downloads
 
 
@@ -118,8 +124,9 @@ async def get_download(
     if not download:
         raise HTTPException(status_code=404, detail="Download not found")
 
-    # Update status from aria2c
-    service.update_download_status(download_id)
+    # Update status from aria2c if active
+    if download.status in ["queued", "downloading", "paused"]:
+        service.update_download_status(download_id)
 
     return download
 
